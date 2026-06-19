@@ -6,13 +6,12 @@ Depending on the startup environment configuration, the service runs either as a
 
 ---
 
-## Architectural Data Flow
 
 ### Request Ingestion & Execution Modes
 * **HTTP Mode**: When configured via environment variables, the service initializes a FastAPI instance exposing endpoints for low-latency synchronous text and voice processing.
 * **Worker Mode**: When HTTP is disabled, the service runs natively as a stateless Taskiq worker, pulling tasks off the RabbitMQ message broker queue.
 
-### Core Processing Layers (SOLID-Compliant)
+### Core Processing Layers
 * **Speech-to-Text Pipeline**: If the input payload consists of audio data, the system utilizes a dedicated transcription layer to decode speech into a clean text string before routing it further.
 * **Text Processing Pipeline**: Clean text strings are directly funneled into the LangChain execution engine layer.
 
