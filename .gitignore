@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+prompt-driven-ai-service.code-workspace
+.vscode
