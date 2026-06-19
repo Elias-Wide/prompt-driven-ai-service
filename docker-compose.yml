@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  ai-http-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src/prompts:/app/src/prompts
+    env_file:
+      - '.env'
+    environment:
+      - HTTP_MODE=TRUE
+    restart: always
+
+  ai-taskiq-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src/prompts:/app/src/prompts
+    env_file:
+      - '.env'
+    environment:
+      - HTTP_MODE=FALSE
+    restart: always
