@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from src.core.config import PROMPTS_DIR
-from src.core.constants import META_PROMPT
+from src.core.constants import META_PROMPT, VOICE_MODEL_PROMPT
 
 
 @dataclass(frozen=True)
@@ -95,6 +95,16 @@ class PromptRegistryService:
         """
         return self._registry.get(META_PROMPT)
 
+    
+    @property
+    def audio_prompt(self) -> Optional[Prompt]:
+        """Extract the specific prompt container designed for audio processing.
+
+        Returns:
+            The dedicated speech-to-text prompt block if found, otherwise None.
+        """
+        return self._registry.get(VOICE_MODEL_PROMPT)
+
     @property
     def get_extra_prompts(self) -> List[Prompt]:
         """Gather all indexed prompt configurations excluding root core block.
@@ -105,5 +115,5 @@ class PromptRegistryService:
         return [
             prompt
             for prompt in self._registry.values()
-            if prompt.name != META_PROMPT
+            if prompt.name not in (META_PROMPT, VOICE_MODEL_PROMPT)
         ]
