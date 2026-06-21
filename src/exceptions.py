@@ -31,6 +31,11 @@ class MainPromptMissingError(PromptMissingError):
     def __init__(self, message: str = "Main prompt is required"):
         super().__init__(message)
 
+class AudioPromptMissingError(PromptMissingError):
+    """Raised when the specific prompt for audio model transcription is missing."""
+
+    def __init__(self, message: str = "Audio transcription prompt is required"):
+        super().__init__(message)
 
 class AdditionalPromptMissingError(PromptMissingError):
     """Raised when auxiliary prompts or context data are missing."""
