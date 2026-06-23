@@ -5,13 +5,18 @@ from groq import Groq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
 
+from src.services.prompts import PromptRegistryService
+
 
 class BaseAiClient(ABC):
     """Abstract Base Class for all AI-related service clients."""
 
-    def __init__(self, key: str, model: str):
+    def __init__(
+        self, key: str, model: str, prompt_registry: PromptRegistryService
+    ):
         self.api_key = key
         self.model = model
+        self.prompt_registry = prompt_registry
 
     @abstractmethod
     def get_client(self) -> Any:
@@ -22,8 +27,10 @@ class BaseAiClient(ABC):
 class BaseSpeechClient(BaseAiClient, ABC):
     """Abstract client for Speech-to-Text (STT) services."""
 
-    def __init__(self, key: str, model: str):
-        super().__init__(key, model)
+    def __init__(
+        self, key: str, model: str, prompt_registry: PromptRegistryService
+    ):
+        super().__init__(key, model, prompt_registry)
         self.client = self.get_client()
 
     @abstractmethod
@@ -50,9 +57,10 @@ class GroqSpeechClient(BaseSpeechClient):
 class BaseTextClient(BaseAiClient, ABC):
     """Abstract client for Large Language Models (LLM)."""
 
-    def __init__(self, key: str, model: str, system_prompt: str):
-        super().__init__(key, model)
-        self.system_prompt = system_prompt
+    def __init__(
+        self, key: str, model: str, prompt_registry: PromptRegistryService
+    ):
+        super().__init__(key, model, prompt_registry)
         self.llm = self.get_client()
 
     @abstractmethod
@@ -64,9 +72,11 @@ class BaseTextClient(BaseAiClient, ABC):
 class GroqTextClient(BaseTextClient):
     """Groq implementation for text generation using LangChain."""
 
-    def __init__(self, key: str, model: str, system_prompt: str):
-        super().__init__(key, model, system_prompt)
-        self.prompt_template = self._create_template()
+    def __init__(
+        self, key: str, model: str, prompt_registry: PromptRegistryService
+    ):
+        super().__init__(key, model, prompt_registry)
+        self.prompt_registry: PromptRegistryService = self._create_template()
         self.chain = self.prompt_template | self.llm
 
     def get_client(self) -> ChatGroq:
@@ -75,8 +85,9 @@ class GroqTextClient(BaseTextClient):
 
     def _create_template(self) -> ChatPromptTemplate:
         """Create a standard ChatPromptTemplate for LLM requests."""
+        meta = self.prompt_registry.meta_prompt
         return ChatPromptTemplate.from_messages(
-            [('system', self.system_prompt), ('human', '{text}')]
+            [('system', self.prompt_registry.meta), ('human', '{text}')]
         )
 
     def send_request(self, text: str) -> str:

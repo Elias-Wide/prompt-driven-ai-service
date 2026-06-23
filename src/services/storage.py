@@ -1,21 +1,23 @@
-import abc
+from abc import ABC, abstractmethod
 from pathlib import Path
 
+from src.exceptions.storage import StorageAccessError, StorageFileNotFoundError
 
-class FileStorageInterface(abc.ABC):
+
+class FileStorageInterface(ABC):
     """Abstract interface defining required contract for file operations."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def save_file(self, file_bytes: bytes, filename: str) -> str:
         """Save raw bytes to the storage domain and return its path lookup."""
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_file(self, file_key: str) -> bytes:
         """Retrieve binary file array content matching the provided key."""
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def delete_file(self, file_key: str) -> None:
         """Remove a target file permanently from the storage ecosystem."""
         pass
@@ -31,16 +33,28 @@ class LocalDiskStorageService(FileStorageInterface):
 
     def save_file(self, file_bytes: bytes, filename: str) -> str:
         file_path = self.upload_dir / filename
-        file_path.write_bytes(file_bytes)
+        try:
+            file_path.write_bytes(file_bytes)
+        except OSError as e:
+            raise StorageAccessError(filename, f'Failed to write bytes: {e}')
         return str(file_path)
 
     def get_file(self, file_key: str) -> bytes:
         file_path = Path(file_key)
         if not file_path.exists():
-            raise FileNotFoundError(f"Requested file missing: {file_key}")
-        return file_path.read_bytes()
+            raise StorageFileNotFoundError(file_key)
+        try:
+            return file_path.read_bytes()
+        except OSError as e:
+            raise StorageAccessError(file_key, f'Failed to read bytes: {e}')
 
     def delete_file(self, file_key: str) -> None:
         file_path = Path(file_key)
-        if file_path.exists():
+        if not file_path.exists():
+            raise StorageFileNotFoundError(file_key)
+        try:
             file_path.unlink()
+        except OSError as e:
+            raise StorageAccessError(
+                file_key, f'Failed to delete file: {e}'
+            ) from e
