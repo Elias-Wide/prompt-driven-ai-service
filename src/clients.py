@@ -85,7 +85,6 @@ class GroqTextClient(BaseTextClient):
 
     def _create_template(self) -> ChatPromptTemplate:
         """Create a standard ChatPromptTemplate for LLM requests."""
-        meta = self.prompt_registry.meta_prompt
         return ChatPromptTemplate.from_messages(
             [('system', self.prompt_registry.meta), ('human', '{text}')]
         )

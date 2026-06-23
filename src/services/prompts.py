@@ -39,18 +39,18 @@ class BasePromptRegistryService(ABC):
     @property
     @abstractmethod
     def audio_prompt(self) -> Optional[Prompt]:
-        """Extract the specific prompt container designed for audio processing."""
+        """Extract the specific prompt for audio processing."""
         pass
 
     @property
     @abstractmethod
     def get_extra_prompts(self) -> List[Prompt]:
-        """Gather all indexed prompt configurations excluding root core blocks."""
+        """Gather all indexed prompts excluding root core blocks."""
         pass
 
 
 class FilePromptRegistryService(BasePromptRegistryService):
-    """Service for discovering, caching, and serving prompts via a FileStorageInterface."""
+    """Service for discovering, caching, and serving prompts."""
 
     def __init__(
         self,
@@ -61,7 +61,8 @@ class FilePromptRegistryService(BasePromptRegistryService):
 
         Args:
             storage: Instance implementing the FileStorageInterface contract.
-            prompts_dir_prefix: The folder or prefix inside storage where prompts live.
+            prompts_dir_prefix:
+                The folder or prefix inside storage where prompts live.
         """
         if not storage:
             raise ValueError('The storage instance cannot be empty.')
@@ -75,7 +76,7 @@ class FilePromptRegistryService(BasePromptRegistryService):
         self._registry: Dict[str, Prompt] = {}
 
     def load_all_prompts(self) -> None:
-        """Scan the storage using the interface and cache Markdown files into memory."""
+        """Scan the storage and cache Markdown files into memory."""
         self._registry.clear()
 
         try:
@@ -108,7 +109,7 @@ class FilePromptRegistryService(BasePromptRegistryService):
 
         if prompt_name not in self._registry:
             raise KeyError(
-                f"Prompt metadata key '{prompt_name}' is not registered in cache."
+                f"Prompt metadata key '{prompt_name}' is not registered."
             )
         return self._registry[prompt_name].text
 

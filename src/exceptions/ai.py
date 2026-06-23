@@ -33,7 +33,7 @@ class MainPromptMissingError(PromptMissingError):
 
 
 class AudioPromptMissingError(PromptMissingError):
-    """Raised when the specific prompt for audio model transcription is missing."""
+    """Raised when the prompt for audio model transcription is missing."""
 
     def __init__(
         self, message: str = 'Audio transcription prompt is required'
@@ -56,7 +56,7 @@ class AIResponseError(AIServiceError):
 
 
 class TextAIResponseError(AIResponseError):
-    """Raised when the text model generates an empty, corrupted, or invalid response."""
+    """Raised when the text model generates an invalid response."""
 
     def __init__(
         self, message: str = 'Text model returned an invalid response'

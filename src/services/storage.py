@@ -36,7 +36,9 @@ class LocalDiskStorageService(FileStorageInterface):
         try:
             file_path.write_bytes(file_bytes)
         except OSError as e:
-            raise StorageAccessError(filename, f'Failed to write bytes: {e}')
+            raise StorageAccessError(
+                filename, f'Failed to write bytes: {e}'
+            ) from e
         return str(file_path)
 
     def get_file(self, file_key: str) -> bytes:
@@ -46,7 +48,9 @@ class LocalDiskStorageService(FileStorageInterface):
         try:
             return file_path.read_bytes()
         except OSError as e:
-            raise StorageAccessError(file_key, f'Failed to read bytes: {e}')
+            raise StorageAccessError(
+                file_key, f'Failed to read bytes: {e}'
+            ) from e
 
     def delete_file(self, file_key: str) -> None:
         file_path = Path(file_key)

@@ -30,12 +30,13 @@ class AIService:
         self._validate_prompts()
 
     def _validate_prompts(self) -> None:
-        """Verify that all required system and auxiliary prompts are present."""
+        """Verify that all required system and prompts are present."""
         self._prompt_service.load_all_prompts()
 
         if not self._prompt_service.meta_prompt:
             raise MainPromptMissingError(
-                'Critical configuration error: Baseline meta-prompt is missing.'
+                'Critical configuration error: '
+                'Baseline meta-prompt is missing.'
             )
 
         if not self._prompt_service.get_extra_prompts:
@@ -47,16 +48,16 @@ class AIService:
         """Convert incoming audio file into a raw text string."""
         try:
             file = self._storage_service.get_file(audio_path)
-        except StorageFileNotFoundError:
+        except StorageFileNotFoundError as e:
             raise VoiceAIResponseError(
                 f'Audio file not found in storage: {audio_path}'
-            )
+            ) from e
         try:
             transcription = self.speech_client.transcribe(file)
-        except Exception as error:
+        except Exception as e:
             raise VoiceAIResponseError(
-                f'Audio transcription layer failed: {str(error)}'
-            )
+                f'Audio transcription layer failed: {str(e)}'
+            ) from e
 
         if not transcription.strip():
             raise TextAIResponseError(
@@ -69,10 +70,10 @@ class AIService:
         """Send processed text to the LLM and return the generated content."""
         try:
             return self.text_client.send_request(prompt_text)
-        except Exception as error:
+        except Exception as e:
             raise TextAIResponseError(
-                f'Downstream language model pipeline failed: {str(error)}'
-            )
+                f'Downstream language model pipeline failed: {str(e)}'
+            ) from e
 
     def process_audio_pipeline(
         self, audio_path: str, auth_token: Optional[str] = None
